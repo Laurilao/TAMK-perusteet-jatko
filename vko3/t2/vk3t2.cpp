@@ -23,6 +23,12 @@ int main()
 
 	cout << "Kanta: " << kanta << ", potenssi: " << potenssi << ", tulos: " << integerPower(kanta, potenssi) << endl;
 
+	kanta = 5;
+	potenssi = 5;
+
+	cout << "Kanta: " << kanta << ", potenssi: " << potenssi << ", tulos: " << integerPower(kanta, potenssi) << endl;
+
+
 
 	system("pause");
 	return 0;
