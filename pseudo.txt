@@ -1,0 +1,21 @@
+1.
+
+a)
+	Alusta pelilauta ja muuttujat
+	Näytä päävalikko
+	
+b)
+	Suorita valikon valinnan mukaiset toimenpiteet
+	Tarkastele valinnan oikeellisuus
+	Lopeta jos valitaan lopetus
+	
+c)
+	Tarkasta ammunnan kohde laudalta
+	Jos huti, merkitse huti
+	Jos osuma
+		Merkitse osuma
+		Tarkasta oliko laivan viimeinen osa
+			Jos oli niin upota laiva
+	
+	Päivitä tilastot
+		
