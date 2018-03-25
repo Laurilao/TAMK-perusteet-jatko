@@ -2,23 +2,22 @@
 #include "Helpers.h"
 
 
-struct Ship
-{
-	int xalku = 0;
-	int xloppu = 0;
-	int yalku = 0;
-	int yloppu = 0;
-};
-
-void SelectedMode(string valinta, char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO])
+void SelectedMode(string valinta, char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], bool* boardIsEmpty)
 {
 	if (valinta == "1")
 	{
-		EnterShips(peliLauta);
+		EnterShips(peliLauta, ampumaLauta, boardIsEmpty);
 	}
 	else if (valinta == "2")
 	{
-		ShootingMode(ampumaLauta, peliLauta);
+		if (*boardIsEmpty == true)
+		{
+			cout << "Valitse ensin laivojen sijainnit!" << endl;
+		}
+		else
+		{
+			ShootingMode(ampumaLauta, peliLauta, boardIsEmpty);
+		}
 	}
 	else if (valinta == "3")
 	{
@@ -26,16 +25,14 @@ void SelectedMode(string valinta, char peliLauta[][LAUDAN_KOKO], char ampumaLaut
 	}
 }
 
-void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO])
+void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO], bool* boardIsEmpty)
 {
-	bool gameOver = true;
 	string koords;
 	int x, y;
+	int shipsLeft = 4;
 
 	do
 	{
-		gameOver = true;
-
 		PrintShots(ampumaLauta, LAUDAN_KOKO, LAUDAN_KOKO);
 
 		cout << endl << "Anna ampumiskoordinaatti: ";
@@ -59,9 +56,7 @@ void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO]
 			}
 			else if (peliLauta[x][y] != '0')
 			{
-				// TODO risuaidat
-				CheckForSink(peliLauta, ampumaLauta, x, y, koords);
-				ampumaLauta[x][y] = peliLauta[x][y];
+				shipsLeft -= CheckForSink(peliLauta, ampumaLauta, x, y, koords);
 			}
 		}
 		else
@@ -69,71 +64,85 @@ void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO]
 			cout << "Virheellinen koordinaatti..." << endl << endl;
 		}
 
-			
-		for (int i = 0; i < LAUDAN_KOKO; i++)
-		{
-			for (int j = 0; j < LAUDAN_KOKO; j++)
-			{
-				if (peliLauta[i][j] != '*' && peliLauta[i][j] != '0')
-				{
-					gameOver = false;
-				}
-			}
-		}
-
-		if (gameOver)
+		if (shipsLeft == 0)
 		{
 			PrintShots(ampumaLauta, LAUDAN_KOKO, LAUDAN_KOKO);
 			cout << endl << "Onneksi olkoon, voitit!" << endl << endl;
+			*boardIsEmpty = true;
 		}
 
-	} while (!gameOver);
+	} while (shipsLeft > 0);
 
 
 }
 
-void CheckForSink(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], int x, int y, string koords)
+int CheckForSink(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], int x, int y, string koords)
 {
-	char marker = peliLauta[x][y];
-	bool found = false;
+	int hitCount = 0;
+	char shipMarker = peliLauta[x][y];
+	ampumaLauta[x][y] = shipMarker;
+	bool finalBlow = false;
 
 	for (int i = 0; i < LAUDAN_KOKO; i++)
 	{
 		for (int j = 0; j < LAUDAN_KOKO; j++)
 		{
-			if (peliLauta[i][j] == marker)
+			if (ampumaLauta[i][j] == shipMarker)
 			{
-				found = true;
+				hitCount++;
 			}
 		}
 	}
 
-	if (!found)
+	switch (shipMarker)
+	{
+	case '5':
+		finalBlow = hitCount == 5 ? true : false;
+		break;
+	case '4':
+		finalBlow = hitCount == 4 ? true : false;
+		break;
+	case '3':
+		finalBlow = hitCount == 3 ? true : false;
+		break;
+	case '2':
+		finalBlow = hitCount == 2 ? true : false;
+		break;
+	default:
+		break;
+	}
+
+	if (finalBlow)
 	{
 		cout << "Laukaus kohtaan " << koords << " upotti laivan." << endl << endl;
 		for (int i = 0; i < LAUDAN_KOKO; i++)
 		{
 			for (int j = 0; j < LAUDAN_KOKO; j++)
 			{
-				if (peliLauta[i][j] == marker)
+				if (ampumaLauta[i][j] == shipMarker)
 				{
-					ampumaLauta[i][j] == '#';
+					ampumaLauta[i][j] = '#';
 				}
 			}
 		}
+		return 1;
 	}
 	else
 	{
 		cout << "Laukaus kohtaan " << koords << " osui laivaan." << endl << endl;
+		return 0;
 	}
 }
 
-void EnterShips(char peliLauta[][LAUDAN_KOKO])
+void EnterShips(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], bool* boardIsEmpty)
 {
 	string koords;
 	char suunta;
 	int x, y, koko;
 	bool sisalla;
+
+	Alusta(peliLauta);
+	Alusta(ampumaLauta);
 
 	do
 	{
@@ -254,6 +263,8 @@ void EnterShips(char peliLauta[][LAUDAN_KOKO])
 	} while (!sisalla);
 	
 	PlaceShip(peliLauta, x, y, koko, suunta);
+
+	*boardIsEmpty = false;
 }
 
 void PlaceShip(char peliLauta[][LAUDAN_KOKO], int x, int y, int koko, char suunta)

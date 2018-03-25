@@ -13,7 +13,7 @@ void TulostaLauta(char lauta[][LAUDAN_KOKO], int rows, int cols)
 
 		for (int j = 0; j < cols; j++)
 		{
-			if (lauta[i][j] == 0)
+			if (lauta[i][j] == '0')
 				cout << ' ' << " ";
 			else
 				cout << lauta[i][j] << " ";
@@ -128,7 +128,7 @@ string PrintMenu()
 
 	do
 	{
-		cout << "Laivanupotuspeli" << endl;
+		cout << endl << "Laivanupotuspeli" << endl;
 		cout << "================" << endl << endl;
 		cout << "Valinnat: " << endl;
 		cout << "1) Syota laivat" << endl;
@@ -144,7 +144,7 @@ string PrintMenu()
 		}
 		else if (find(sallitut.begin(), sallitut.end(), valinta) != sallitut.end())
 		{
-			cout << "Valitsit: " << valinta << endl << endl;
+			cout << endl;
 			valid = true;
 		}
 
