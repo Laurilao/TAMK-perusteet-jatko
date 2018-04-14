@@ -59,7 +59,7 @@ void PrintShots(char lauta[][LAUDAN_KOKO], int rows, int cols)
 
 }
 
-void LoadGame(char lauta[][LAUDAN_KOKO])
+void LoadGame(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO])
 {
 	ifstream inFile;
 	string rivi;
@@ -67,7 +67,7 @@ void LoadGame(char lauta[][LAUDAN_KOKO])
 
 	try
 	{
-		inFile.open("Save.txt");
+		inFile.open("pelitilanne.txt");
 
 		if (!inFile.is_open())
 		{
@@ -84,36 +84,107 @@ void LoadGame(char lauta[][LAUDAN_KOKO])
 	{
 		getline(inFile, rivi);
 
-		for (int i = 0; i < LAUDAN_KOKO; i++)
+		if (row < 7)
 		{
-			lauta[row][i] = rivi[i];
+			for (int i = 0; i < LAUDAN_KOKO; i++)
+			{
+				peliLauta[row][i] = rivi[i];
+			}
+		}
+		else
+		{
+			for (int i = 0; i < LAUDAN_KOKO; i++)
+			{
+				ampumaLauta[row - 7][i] = rivi[i];
+			}
 		}
 		row++;
 	}
+	
 	cout << "Pelitilanne ladattu!" << endl;
 	inFile.close();
 }
 
-void SaveGame(char lauta[][LAUDAN_KOKO], int rows, int cols)
+bool FileExists() 
 {
+	ifstream inFile;
+
+	inFile.open("pelitilanne.txt");
+
+	if (inFile.is_open())
+	{
+		inFile.close();
+		return true;
+	}
+	else 
+	{
+		return false;
+	}
+}
+
+
+void SaveGame(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], int rows, int cols)
+{
+	string overWrite = "";
+
+	if (FileExists())
+	{
+		cout << "Tiedosto on jo olemassa, haluatko ylikirjoittaa? (k/e): ";
+		
+		while (overWrite != "k" && overWrite != "e")
+		{
+			getline(cin, overWrite);
+
+			if (overWrite != "k" && overWrite != "e")
+			{
+				cout << "Virheellinen valinta, yrita uudelleen: ";
+			}
+		}
+
+		if (overWrite == "e")
+		{
+			cout << "Tallentaminen keskeytetty" << endl;
+			return;
+		}
+	}
+
 	ofstream outFile;
 
-	outFile.open("Save.txt");
+	outFile.open("pelitilanne.txt");
 
 	for (int i = 0; i < rows; i++)
 	{
 		for (int j = 0; j < cols; j++)
 		{
-			if (lauta[i][j] == NULL || lauta[i][j] == '0')
+			if (peliLauta[i][j] == NULL || peliLauta[i][j] == '0')
 			{
 				outFile << "0";
 			}
 			else
 			{
-				outFile << lauta[i][j];
+				outFile << peliLauta[i][j];
 			}
 		}
 		outFile << endl;
+	}
+
+	for (int i = 0; i < rows; i++)
+	{
+		for (int j = 0; j < cols; j++)
+		{
+			if (ampumaLauta[i][j] == NULL || ampumaLauta[i][j] == '0')
+			{
+				outFile << "0";
+			}
+			else
+			{
+				outFile << ampumaLauta[i][j];
+			}
+		}
+		if (i < rows - 1)
+		{
+			outFile << endl;
+		}
 	}
 	cout << "Pelitilanne tallennettu!" << endl;
 
@@ -122,7 +193,7 @@ void SaveGame(char lauta[][LAUDAN_KOKO], int rows, int cols)
 
 string PrintMenu()
 {
-	vector<string> sallitut{ "1", "2", "3", "L", "l" };
+	vector<string> sallitut{ "1", "2", "3", "4", "5", "L", "l" };
 	string valinta;
 	bool valid = false;
 
@@ -134,6 +205,8 @@ string PrintMenu()
 		cout << "1) Syota laivat" << endl;
 		cout << "2) Pelaa" << endl;
 		cout << "3) Arvo laivojen sijainnit" << endl;
+		cout << "4) Tallenna pelitilanne" << endl;
+		cout << "5) Lataa pelitilanne" << endl;
 		cout << "L) Lopeta" << endl << endl;
 		cout << "Valintasi: ";
 		getline(cin, valinta);
@@ -148,7 +221,7 @@ string PrintMenu()
 			valid = true;
 		}
 
-	} while (valid == false);
+	} while (!valid);
 
 
 	return valinta;
@@ -202,4 +275,16 @@ bool LaillinenValinta(string sallitut, char valinta)
 	}
 
 	return false;
+}
+
+void DebugPrint(char peliLauta[][LAUDAN_KOKO])
+{
+	for (int i = 0; i < LAUDAN_KOKO; i++)
+	{
+		for (int j = 0; j < LAUDAN_KOKO; j++)
+		{
+			cout << peliLauta[i][j];
+		}
+		cout << endl;
+	}
 }

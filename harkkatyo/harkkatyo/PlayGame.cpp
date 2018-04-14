@@ -1,7 +1,6 @@
 #include "PlayGame.h"
 #include "Helpers.h"
 
-
 void SelectedMode(string valinta, char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], bool* boardIsEmpty)
 {
 	if (valinta == "1")
@@ -21,7 +20,22 @@ void SelectedMode(string valinta, char peliLauta[][LAUDAN_KOKO], char ampumaLaut
 	}
 	else if (valinta == "3")
 	{
-
+		RandomPlacement(peliLauta, ampumaLauta, boardIsEmpty);
+		
+	}
+	else if (valinta == "4")
+	{
+		if (*boardIsEmpty == false)
+		{
+			SaveGame(peliLauta, ampumaLauta, LAUDAN_KOKO, LAUDAN_KOKO);
+		}
+		else
+			cout << "Ei voi tallentaa tyhjaa pelitilannetta!" << endl << endl;
+	}
+	else if (valinta == "5")
+	{
+		LoadGame(peliLauta, ampumaLauta);
+		*boardIsEmpty = false;
 	}
 }
 
@@ -29,19 +43,20 @@ void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO]
 {
 	string koords;
 	int x, y;
-	int shipsLeft = 4;
+	bool debugPrint = false;
+	bool gameOver = false;
 
 	do
 	{
-		PrintShots(ampumaLauta, LAUDAN_KOKO, LAUDAN_KOKO);
+		if (!debugPrint)
+		{
+			PrintShots(ampumaLauta, LAUDAN_KOKO, LAUDAN_KOKO);
+		}
+		debugPrint = false;
 
 		cout << endl << "Anna ampumiskoordinaatti: ";
 		getline(cin, koords);
-
-		if (koords == "p" || koords == "P")
-		{
-			break;
-		}
+		cout << endl;
 
 		if (MuunnaKoordinaatti(koords, &x, &y) == 0)
 		{
@@ -56,24 +71,59 @@ void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO]
 			}
 			else if (peliLauta[x][y] != '0')
 			{
-				shipsLeft -= CheckForSink(peliLauta, ampumaLauta, x, y, koords);
+				CheckForSink(peliLauta, ampumaLauta, x, y, koords);
 			}
+		}
+		else if (koords == "p" || koords == "P")
+		{
+			break;
+		}
+		else if (koords == "\\@")
+		{
+			cout << "Laivat sijaitsevat seuraavissa paikoissa:" << endl << endl;
+			TulostaLauta(peliLauta, LAUDAN_KOKO, LAUDAN_KOKO);
+			debugPrint = true;
 		}
 		else
 		{
 			cout << "Virheellinen koordinaatti..." << endl << endl;
 		}
 
-		if (shipsLeft == 0)
+		gameOver = IsGameOver(peliLauta, ampumaLauta);
+
+		if (gameOver)
 		{
+			*boardIsEmpty = true;
 			PrintShots(ampumaLauta, LAUDAN_KOKO, LAUDAN_KOKO);
 			cout << endl << "Onneksi olkoon, voitit!" << endl << endl;
-			*boardIsEmpty = true;
 		}
 
-	} while (shipsLeft > 0);
+	} while (!gameOver);
+}
 
+bool IsGameOver(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO])
+{
+	bool shipsLeft = false;
 
+	for (int i = 0; i < LAUDAN_KOKO; i++)
+	{
+		for (int j = 0; j < LAUDAN_KOKO; j++)
+		{
+			if (peliLauta[i][j] != '0')
+			{
+				if (ampumaLauta[i][j] != '#')
+				{
+					shipsLeft = true;
+				}
+			}
+		}
+	}
+	
+	if (shipsLeft)
+	{
+		return false;
+	}
+	return true;
 }
 
 int CheckForSink(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], int x, int y, string koords)
@@ -139,7 +189,7 @@ void EnterShips(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], 
 	string koords;
 	char suunta;
 	int x, y, koko;
-	bool sisalla;
+	bool validPlacement;
 
 	Alusta(peliLauta);
 	Alusta(ampumaLauta);
@@ -163,14 +213,9 @@ void EnterShips(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], 
 
 		} while (suunta != 'p' && suunta != 'i' && suunta != 'e' && suunta != 'l');
 
-		sisalla = CheckBoundaries(x, y, suunta, koko);
+		validPlacement = CheckValidPlacement(peliLauta, x, y, suunta, koko);
 
-		if (!sisalla)
-		{
-			cout << "Laiva ei ollut pelilaudan sisalla! Yrita uudelleen..." << endl;
-		}
-
-	} while (!sisalla);
+	} while (!validPlacement);
 
 	PlaceShip(peliLauta, x, y, koko, suunta);
 
@@ -193,14 +238,9 @@ void EnterShips(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], 
 
 		} while (suunta != 'p' && suunta != 'i' && suunta != 'e' && suunta != 'l');
 
-		sisalla = CheckBoundaries(x, y, suunta, koko);
+		validPlacement = CheckValidPlacement(peliLauta, x, y, suunta, koko);
 
-		if (!sisalla)
-		{
-			cout << "Laiva ei ollut pelilaudan sisalla! Yrita uudelleen..." << endl;
-		}
-
-	} while (!sisalla);
+	} while (!validPlacement);
 
 	PlaceShip(peliLauta, x, y, koko, suunta);
 
@@ -223,14 +263,9 @@ void EnterShips(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], 
 
 		} while (suunta != 'p' && suunta != 'i' && suunta != 'e' && suunta != 'l');
 
-		sisalla = CheckBoundaries(x, y, suunta, koko);
+		validPlacement = CheckValidPlacement(peliLauta, x, y, suunta, koko);
 
-		if (!sisalla)
-		{
-			cout << "Laiva ei ollut pelilaudan sisalla! Yrita uudelleen..." << endl;
-		}
-
-	} while (!sisalla);
+	} while (!validPlacement);
 
 	PlaceShip(peliLauta, x, y, koko, suunta);
 
@@ -253,14 +288,9 @@ void EnterShips(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], 
 
 		} while (suunta != 'p' && suunta != 'i' && suunta != 'e' && suunta != 'l');
 
-		sisalla = CheckBoundaries(x, y, suunta, koko);
+		validPlacement = CheckValidPlacement(peliLauta, x, y, suunta, koko);
 
-		if (!sisalla)
-		{
-			cout << "Laiva ei ollut pelilaudan sisalla! Yrita uudelleen..." << endl;
-		}
-
-	} while (!sisalla);
+	} while (!validPlacement);
 	
 	PlaceShip(peliLauta, x, y, koko, suunta);
 
@@ -315,11 +345,83 @@ void PlaceShip(char peliLauta[][LAUDAN_KOKO], int x, int y, int koko, char suunt
 	}
 }
 
+bool CheckValidPlacement(char peliLauta[][LAUDAN_KOKO], int x, int y, char suunta, int koko)
+{
+	bool withinBoundaries = CheckBoundaries(x, y, suunta, koko);
+
+	if (withinBoundaries)
+	{
+		bool noOverlap = CheckOverlap(peliLauta, x, y, suunta, koko);
+
+		if (noOverlap)
+		{
+			return true;
+		}
+		else
+		{
+			cout << "Alla on jo laiva!" << endl << endl;
+			return false;
+		}
+
+	}
+	else
+	{
+		cout << "Valinta ei ole pelilaudan sisalla!" << endl << endl;
+		return false;
+	}
+}
+
+bool CheckOverlap(char peliLauta[][LAUDAN_KOKO], int x, int y, char suunta, int koko)
+{
+	if (suunta == 'i')
+	{
+		for (int i = 0; i < koko; i++)
+		{
+			if (peliLauta[x][y + i] != '0')
+			{
+				return false;
+			}
+		}
+	}
+	else if (suunta == 'e')
+	{
+		for (int i = 0; i < koko; i++)
+		{
+			if (peliLauta[x + i][y] != '0')
+			{
+				return false;
+			}
+		}
+	}
+	else if (suunta == 'l')
+	{
+		for (int i = 0; i < koko; i++)
+		{
+			if (peliLauta[x][y - i] != '0')
+			{
+				return false;
+			}
+		}
+	}
+	else if (suunta == 'p')
+	{
+		for (int i = 0; i < koko; i++)
+		{
+			if (peliLauta[x - i][y] != '0')
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 bool CheckBoundaries(int x, int y, char suunta, int koko)
 {
 	if (suunta == 'p')
 	{
-		if (x - koko < 0)
+		if (x - koko < -1)
 		{
 			return false;
 		}
@@ -352,7 +454,7 @@ bool CheckBoundaries(int x, int y, char suunta, int koko)
 	}
 	else if (suunta == 'l')
 	{
-		if (y - koko < 0)
+		if (y - koko < -1)
 		{
 			return false;
 		}
@@ -362,5 +464,63 @@ bool CheckBoundaries(int x, int y, char suunta, int koko)
 		}
 	}
 	else
+	{
 		return false;
+	}
+}
+
+void RandomPlacement(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], bool* boardIsEmpty)
+{
+	map<int, char> directions;
+	directions[0] = 'p';
+	directions[1] = 'i';
+	directions[2] = 'e';
+	directions[3] = 'l';
+
+	Alusta(peliLauta);
+	Alusta(ampumaLauta);
+
+	PlaceRandomly(peliLauta, 5, directions);
+	PlaceRandomly(peliLauta, 4, directions);
+	PlaceRandomly(peliLauta, 3, directions);
+	PlaceRandomly(peliLauta, 2, directions);
+
+	*boardIsEmpty = false;
+}
+
+void PlaceRandomly(char peliLauta[][LAUDAN_KOKO], int koko, map<int, char> directions)
+{
+	int x, y;
+	int debugTryCount = 0;
+	char suunta;
+	bool wasValid = false;
+
+	// Random number generation
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_int_distribution<> koord(0, 6);
+	uniform_int_distribution<> direction(0, 3);
+
+	do
+	{
+		x = koord(gen);
+		y = direction(gen);
+		suunta = directions[rand() % 4];
+
+		if (CheckBoundaries(x, y, suunta, koko))
+		{
+			if (CheckOverlap(peliLauta, x, y, suunta, koko))
+			{
+				wasValid = true;
+			}
+		}
+		debugTryCount++;
+
+	} while (!wasValid);
+
+	PlaceShip(peliLauta, x, y, koko, suunta);
+
+	cout << koko << ":n pituinen laiva lisatty!" << endl;
+	//cout << "Yrityksia meni: " << debugTryCount << endl;
+
 }

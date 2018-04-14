@@ -8,6 +8,8 @@ int main()
 {
 	char peliLauta[LAUDAN_KOKO][LAUDAN_KOKO];
 	char ampumaLauta[LAUDAN_KOKO][LAUDAN_KOKO];
+	Alusta(peliLauta);
+	Alusta(ampumaLauta);
 
 	string valinta;
 	bool boardIsEmpty = true;
