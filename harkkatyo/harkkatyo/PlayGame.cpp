@@ -1,6 +1,8 @@
 #include "PlayGame.h"
 #include "Helpers.h"
 
+
+// Aja valikon valinnan mukainen aliohjelma
 void SelectedMode(string valinta, char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], bool* boardIsEmpty)
 {
 	if (valinta == "1")
@@ -39,6 +41,7 @@ void SelectedMode(string valinta, char peliLauta[][LAUDAN_KOKO], char ampumaLaut
 	}
 }
 
+// Ajetaan ampumismoodia kunnes peli ohi tai valitaan paluu (p)
 void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO], bool* boardIsEmpty)
 {
 	string koords;
@@ -48,6 +51,7 @@ void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO]
 
 	do
 	{
+		// Jos käytetty laivojen vakoilua, ei tulosteta uudestaan pelitilannetta
 		if (!debugPrint)
 		{
 			PrintShots(ampumaLauta, LAUDAN_KOKO, LAUDAN_KOKO);
@@ -74,10 +78,12 @@ void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO]
 				CheckForSink(peliLauta, ampumaLauta, x, y, koords);
 			}
 		}
+		// Jos syötetään p, palataan valikkoon
 		else if (koords == "p" || koords == "P")
 		{
 			break;
 		}
+		// Laivojen sijainnin vakoilu
 		else if (koords == "\\@")
 		{
 			cout << "Laivat sijaitsevat seuraavissa paikoissa:" << endl << endl;
@@ -101,6 +107,7 @@ void ShootingMode(char ampumaLauta[][LAUDAN_KOKO], char peliLauta[][LAUDAN_KOKO]
 	} while (!gameOver);
 }
 
+// Tarkista onko peli ohi
 bool IsGameOver(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO])
 {
 	bool shipsLeft = false;
@@ -111,21 +118,19 @@ bool IsGameOver(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO])
 		{
 			if (peliLauta[i][j] != '0')
 			{
+				// Jos sijoittelutaulukon laivaa vastaava ampumataulukon ruutu ei ole uponnut laiva, peli on vielä kesken
 				if (ampumaLauta[i][j] != '#')
 				{
-					shipsLeft = true;
+					return false;
 				}
 			}
 		}
 	}
 	
-	if (shipsLeft)
-	{
-		return false;
-	}
 	return true;
 }
 
+// Tarkista upposiko osuman saanut laiva
 int CheckForSink(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], int x, int y, string koords)
 {
 	int hitCount = 0;
@@ -162,6 +167,7 @@ int CheckForSink(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO],
 		break;
 	}
 
+	// Jos laivan viimeinen osa, vaihda * -merkit #-merkeiksi 
 	if (finalBlow)
 	{
 		cout << "Laukaus kohtaan " << koords << " upotti laivan." << endl << endl;
@@ -184,6 +190,7 @@ int CheckForSink(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO],
 	}
 }
 
+// Sijoita laivat käsin pelilaudalle
 void EnterShips(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], bool* boardIsEmpty)
 {
 	string koords;
@@ -297,6 +304,7 @@ void EnterShips(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], 
 	*boardIsEmpty = false;
 }
 
+// Aseta laiva pelilaudalle
 void PlaceShip(char peliLauta[][LAUDAN_KOKO], int x, int y, int koko, char suunta)
 {
 	char marker;
@@ -345,6 +353,7 @@ void PlaceShip(char peliLauta[][LAUDAN_KOKO], int x, int y, int koko, char suunt
 	}
 }
 
+// Tarkista onko käsin yritetty sijoitus laillinen
 bool CheckValidPlacement(char peliLauta[][LAUDAN_KOKO], int x, int y, char suunta, int koko)
 {
 	bool withinBoundaries = CheckBoundaries(x, y, suunta, koko);
@@ -362,7 +371,6 @@ bool CheckValidPlacement(char peliLauta[][LAUDAN_KOKO], int x, int y, char suunt
 			cout << "Alla on jo laiva!" << endl << endl;
 			return false;
 		}
-
 	}
 	else
 	{
@@ -371,6 +379,7 @@ bool CheckValidPlacement(char peliLauta[][LAUDAN_KOKO], int x, int y, char suunt
 	}
 }
 
+// Tarkista yritetäänkö sijoittaa olemassa olevan laivan päälle
 bool CheckOverlap(char peliLauta[][LAUDAN_KOKO], int x, int y, char suunta, int koko)
 {
 	if (suunta == 'i')
@@ -417,6 +426,7 @@ bool CheckOverlap(char peliLauta[][LAUDAN_KOKO], int x, int y, char suunta, int 
 	return true;
 }
 
+// Tarkista yritetäänkö sijoittaa pelilaudan ulkopuolelle
 bool CheckBoundaries(int x, int y, char suunta, int koko)
 {
 	if (suunta == 'p')
@@ -469,6 +479,7 @@ bool CheckBoundaries(int x, int y, char suunta, int koko)
 	}
 }
 
+// Sijoittele laivat satunnaisesti pelilaudalle
 void RandomPlacement(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], bool* boardIsEmpty)
 {
 	map<int, char> directions;
@@ -488,6 +499,7 @@ void RandomPlacement(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KO
 	*boardIsEmpty = false;
 }
 
+// Sijoita parametrina saadun kokoinen laiva pelilaudalle
 void PlaceRandomly(char peliLauta[][LAUDAN_KOKO], int koko, map<int, char> directions)
 {
 	int x, y;
@@ -495,12 +507,13 @@ void PlaceRandomly(char peliLauta[][LAUDAN_KOKO], int koko, map<int, char> direc
 	char suunta;
 	bool wasValid = false;
 
-	// Random number generation
+	// Random number generaattori
 	random_device rd;
 	mt19937 gen(rd());
 	uniform_int_distribution<> koord(0, 6);
 	uniform_int_distribution<> direction(0, 3);
 
+	// Luo satunnaissijoituksia kunnes validi yhdistelmä saatu
 	do
 	{
 		x = koord(gen);

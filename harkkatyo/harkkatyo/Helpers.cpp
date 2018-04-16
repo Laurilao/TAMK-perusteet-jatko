@@ -30,13 +30,12 @@ void TulostaLauta(char lauta[][LAUDAN_KOKO], int rows, int cols)
 
 void PrintShots(char lauta[][LAUDAN_KOKO], int rows, int cols)
 {
-
 	cout << "Pelitilanne on seuraava:" << endl << endl;
 	cout << "    1 2 3 4 5 6 7  " << endl;
 	cout << "   --------------- " << endl;
 
-	for (int i = 0; i < rows; i++) {
-
+	for (int i = 0; i < rows; i++) 
+	{
 		cout << static_cast<char>('A' + i) << " | ";
 
 		for (int j = 0; j < cols; j++)
@@ -80,6 +79,9 @@ void LoadGame(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO])
 		return;
 	}
 
+	// Tiedostossa 14kpl 7 merkin riviä
+	// Ensimmäiset 7 riviä ovat laivojen sijoittelutaulukko
+	// seuraavat 7 riviä ovat ammuntatulosten taulukko
 	while (inFile.peek() != EOF)
 	{
 		getline(inFile, rivi);
@@ -127,6 +129,7 @@ void SaveGame(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], in
 {
 	string overWrite = "";
 
+	// Tarkistetaan onko tiedosto jo olemassa, ja kysytään halutaanko ylikirjoittaa
 	if (FileExists())
 	{
 		cout << "Tiedosto on jo olemassa, haluatko ylikirjoittaa? (k/e): ";
@@ -148,6 +151,7 @@ void SaveGame(char peliLauta[][LAUDAN_KOKO], char ampumaLauta[][LAUDAN_KOKO], in
 		}
 	}
 
+	// Jatketaan suoritusta jos tiedostoa ei löydy tai valittiin ylikirjoitus
 	ofstream outFile;
 
 	outFile.open("pelitilanne.txt");
@@ -227,6 +231,7 @@ string PrintMenu()
 	return valinta;
 }
 
+// Muuntaa string muotoiset koordinaatit (esim. a1) taulukon indekseiksi (ko. tapauksessa [0][0])
 int MuunnaKoordinaatti(string koords, int* x, int* y)
 {
 	// Poista whitespace
@@ -256,6 +261,7 @@ int MuunnaKoordinaatti(string koords, int* x, int* y)
 	}
 }
 
+// Alustaa taulukon '0' merkeillä
 void Alusta(char lauta[][LAUDAN_KOKO])
 {
 	for (int i = 0; i < LAUDAN_KOKO; i++)

@@ -1,7 +1,5 @@
 #pragma once
 #include "Helpers.h"
-#include <map>
-#include <random>
 
 void SelectedMode(string, char[][LAUDAN_KOKO], char[][LAUDAN_KOKO], bool*);
 void EnterShips(char[][LAUDAN_KOKO], char[][LAUDAN_KOKO], bool*);
